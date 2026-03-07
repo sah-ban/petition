@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useReadContract } from "wagmi";
 import {
   PETITION_ABI,
@@ -22,50 +23,67 @@ interface Petition {
   createdAt: bigint;
 }
 
-function PetitionLoader({ petitionId }: { petitionId: number }) {
-  const { data: petition } = useReadContract({
-    address: PETITION_CONTRACT_ADDRESS,
-    abi: PETITION_ABI,
-    functionName: "getPetition",
-    args: [BigInt(petitionId)],
-    chainId: BASE_CHAIN_ID,
-  });
-
-  if (!petition) {
-    return (
-      <div className="card">
-        <div className="card-content">
-          <div
-            className="skeleton"
-            style={{ height: "180px", marginBottom: "16px" }}
-          />
-          <div
-            className="skeleton"
-            style={{ height: "24px", width: "70%", marginBottom: "8px" }}
-          />
-          <div
-            className="skeleton"
-            style={{ height: "16px", width: "100%", marginBottom: "4px" }}
-          />
-          <div className="skeleton" style={{ height: "16px", width: "60%" }} />
-        </div>
+function PetitionLoader() {
+  return (
+    <div className="card">
+      <div className="card-content">
+        <div
+          className="skeleton"
+          style={{ height: "180px", marginBottom: "16px" }}
+        />
+        <div
+          className="skeleton"
+          style={{ height: "24px", width: "70%", marginBottom: "8px" }}
+        />
+        <div
+          className="skeleton"
+          style={{ height: "16px", width: "100%", marginBottom: "4px" }}
+        />
+        <div className="skeleton" style={{ height: "16px", width: "60%" }} />
       </div>
-    );
-  }
-
-  return <PetitionCard petition={petition as unknown as Petition} />;
+    </div>
+  );
 }
 
-export default function HomePage() {
-  const { data: totalPetitions, isLoading } = useReadContract({
-    address: PETITION_CONTRACT_ADDRESS,
-    abi: PETITION_ABI,
-    functionName: "getTotalPetitions",
-    chainId: BASE_CHAIN_ID,
-  });
+const PAGE_SIZE = 12;
 
-  const total = totalPetitions ? Number(totalPetitions) : 0;
-  const petitionIds = Array.from({ length: total }, (_, i) => total - 1 - i);
+export default function HomePage() {
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const { data: totalPetitionsData, isLoading: isTotalLoading } =
+    useReadContract({
+      address: PETITION_CONTRACT_ADDRESS,
+      abi: PETITION_ABI,
+      functionName: "getTotalPetitions",
+      chainId: BASE_CHAIN_ID,
+    });
+
+  const total = totalPetitionsData ? Number(totalPetitionsData) : 0;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+
+  // Calculate the bounds for retrieving the newest items.
+  // We want page 1 to be the *last* PAGE_SIZE items in the array.
+  const offset = Math.max(0, total - currentPage * PAGE_SIZE);
+  const limit = Math.min(PAGE_SIZE, total - (currentPage - 1) * PAGE_SIZE);
+
+  const { data: paginatedPetitions, isLoading: isPetitionsLoading } =
+    useReadContract({
+      address: PETITION_CONTRACT_ADDRESS,
+      abi: PETITION_ABI,
+      functionName: "getPetitionsPaginated",
+      args: [BigInt(offset), BigInt(limit)],
+      chainId: BASE_CHAIN_ID,
+      query: {
+        enabled: total > 0,
+      },
+    });
+
+  // Reverse the fetched array to maintain newest-first order within the page.
+  const petitionsToDisplay = paginatedPetitions
+    ? [...(paginatedPetitions as Petition[])].reverse()
+    : [];
+
+  const isLoading = isTotalLoading || isPetitionsLoading;
 
   return (
     <>
@@ -113,27 +131,8 @@ export default function HomePage() {
 
         {isLoading ? (
           <div className="petition-grid">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="card">
-                <div className="card-content">
-                  <div
-                    className="skeleton"
-                    style={{ height: "180px", marginBottom: "16px" }}
-                  />
-                  <div
-                    className="skeleton"
-                    style={{
-                      height: "24px",
-                      width: "70%",
-                      marginBottom: "8px",
-                    }}
-                  />
-                  <div
-                    className="skeleton"
-                    style={{ height: "16px", width: "100%" }}
-                  />
-                </div>
-              </div>
+            {Array.from({ length: PAGE_SIZE }).map((_, i) => (
+              <PetitionLoader key={`loader-${i}`} />
             ))}
           </div>
         ) : total === 0 ? (
@@ -149,11 +148,55 @@ export default function HomePage() {
             </Link>
           </div>
         ) : (
-          <div className="petition-grid">
-            {petitionIds.map((id) => (
-              <PetitionLoader key={id} petitionId={id} />
-            ))}
-          </div>
+          <>
+            <div className="petition-grid">
+              {petitionsToDisplay.map((petition) => (
+                <PetitionCard
+                  key={petition.id.toString()}
+                  petition={petition}
+                />
+              ))}
+            </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "16px",
+                  marginTop: "40px",
+                }}
+              >
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </button>
+                <span
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontSize: "0.9rem",
+                    fontWeight: 500,
+                  }}
+                >
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() =>
+                    setCurrentPage((p) => Math.min(totalPages, p + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
       </section>
     </>
