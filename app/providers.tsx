@@ -2,7 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { WagmiProvider, http } from "wagmi";
-import { sepolia } from "wagmi/chains";
+import { base } from "wagmi/chains";
 import {
   RainbowKitProvider,
   darkTheme,
@@ -12,11 +12,11 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { type ReactNode, useState } from "react";
 
 const config = getDefaultConfig({
-  appName: "On-Chain Petition",
+  appName: "BasePetition",
   projectId: "demo", // Replace with your WalletConnect project ID from https://cloud.walletconnect.com
-  chains: [sepolia],
+  chains: [base],
   transports: {
-    [sepolia.id]: http(),
+    [base.id]: http(),
   },
   ssr: true,
 });

@@ -1,28 +1,122 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useReadContract,
 } from "wagmi";
+import { formatEther, parseEventLogs } from "viem";
 import { PETITION_ABI, PETITION_CONTRACT_ADDRESS } from "@/lib/contract";
 
 export default function CreatePetitionPage() {
   const router = useRouter();
   const { isConnected } = useAccount();
 
+  const { data: creationFee } = useReadContract({
+    address: PETITION_CONTRACT_ADDRESS,
+    abi: PETITION_ABI,
+    functionName: "getCreationFee",
+  });
+
+  const feeInEth = creationFee ? formatEther(creationFee as bigint) : "0";
+  const isFree = !creationFee || (creationFee as bigint) === 0n;
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [targetGoal, setTargetGoal] = useState("");
   const [deadline, setDeadline] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [warning, setWarning] = useState<string | null>(null);
+  const [createdId, setCreatedId] = useState<string | null>(null);
 
   const { writeContract, data: txHash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+  const {
+    data: receipt,
+    isLoading: isConfirming,
+    isSuccess,
+  } = useWaitForTransactionReceipt({
     hash: txHash,
   });
+
+  const [hasProcessedLogs, setHasProcessedLogs] = useState(false);
+
+  useEffect(() => {
+    if (isSuccess && receipt && !hasProcessedLogs) {
+      const logs = parseEventLogs({
+        abi: PETITION_ABI,
+        logs: receipt.logs,
+        eventName: "PetitionCreated",
+      });
+      if (logs.length > 0) {
+        const eventArgs = logs[0].args as { petitionId: bigint };
+        setCreatedId(eventArgs.petitionId.toString());
+        setHasProcessedLogs(true);
+      }
+    }
+  }, [isSuccess, receipt, hasProcessedLogs]);
+
+  const uploadImage = async (image: File) => {
+    setIsUploading(true);
+    setWarning(null);
+    const formData = new FormData();
+    formData.append("image", image);
+    try {
+      const response = await fetch(
+        `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_KEY}`,
+        {
+          method: "POST",
+          body: formData,
+        },
+      );
+
+      const data: {
+        success: boolean;
+        data?: { url: string };
+        error?: { message: string };
+      } = await response.json();
+
+      if (data.success && data.data) {
+        setImageUrl(data.data.url);
+      } else {
+        setWarning(
+          "Upload failed: " + (data.error?.message || "Unknown error"),
+        );
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      setWarning("Error uploading image. Please check your connection.");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const image = e.target.files[0];
+      if (image.type.startsWith("image/")) {
+        await uploadImage(image);
+      } else {
+        setWarning("Invalid file type. Please upload an image or GIF.");
+      }
+    }
+  };
+
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    const items = e.clipboardData.items;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf("image") !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          await uploadImage(file);
+          break;
+        }
+      }
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,6 +137,9 @@ export default function CreatePetitionPage() {
         BigInt(targetGoal || "0"),
         deadlineTimestamp,
       ],
+      ...(creationFee && (creationFee as bigint) > 0n
+        ? { value: creationFee as bigint }
+        : {}),
     });
   };
 
@@ -65,8 +162,16 @@ export default function CreatePetitionPage() {
           <div
             style={{ display: "flex", gap: "12px", justifyContent: "center" }}
           >
+            {createdId && (
+              <button
+                className="btn btn-primary"
+                onClick={() => router.push(`/petition/${createdId}`)}
+              >
+                View Petition
+              </button>
+            )}
             <button
-              className="btn btn-primary"
+              className="btn btn-secondary"
               onClick={() => router.push("/")}
             >
               View All Petitions
@@ -138,30 +243,154 @@ export default function CreatePetitionPage() {
 
             <div className="form-group">
               <label className="form-label">
-                Image URL <span className="form-hint">(optional)</span>
+                Petition Image{" "}
+                <span className="form-hint">(optional - paste or upload)</span>
               </label>
-              <input
-                type="url"
-                className="form-input"
-                placeholder="https://example.com/image.jpg"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
-              />
-              {imageUrl && (
-                <img
-                  src={imageUrl}
-                  alt="Preview"
-                  style={{
-                    marginTop: "12px",
-                    maxHeight: "200px",
-                    borderRadius: "var(--radius-md)",
-                    objectFit: "cover",
-                    width: "100%",
-                  }}
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).style.display = "none";
-                  }}
+              <div
+                onPaste={handlePaste}
+                style={{
+                  border: "2px dashed var(--border-color)",
+                  borderRadius: "var(--radius-md)",
+                  padding: "20px",
+                  textAlign: "center",
+                  cursor: "pointer",
+                  background: "rgba(255, 255, 255, 0.02)",
+                  transition: "all 0.2s ease",
+                  position: "relative",
+                }}
+                className="hover-glow"
+                onClick={() => document.getElementById("image-upload")?.click()}
+              >
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  style={{ display: "none" }}
                 />
+
+                {imageUrl ? (
+                  <div style={{ position: "relative" }}>
+                    <img
+                      src={imageUrl}
+                      alt="Preview"
+                      style={{
+                        maxHeight: "300px",
+                        borderRadius: "var(--radius-sm)",
+                        objectFit: "cover",
+                        width: "100%",
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setImageUrl("");
+                      }}
+                      style={{
+                        position: "absolute",
+                        top: "10px",
+                        right: "10px",
+                        background: "rgba(0,0,0,0.6)",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: "32px",
+                        height: "32px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "18px",
+                      }}
+                    >
+                      ×
+                    </button>
+                    <p
+                      style={{
+                        marginTop: "8px",
+                        fontSize: "0.85rem",
+                        color: "var(--text-muted)",
+                      }}
+                    >
+                      Click or paste to replace image
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{ padding: "40px 20px" }}>
+                    <div
+                      style={{
+                        fontSize: "2rem",
+                        marginBottom: "12px",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        display: "flex",
+                      }}
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="size-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
+                        />
+                      </svg>
+                    </div>
+                    <p style={{ fontWeight: 500, marginBottom: "4px" }}>
+                      {isUploading
+                        ? "Uploading..."
+                        : "Click to upload or paste image"}
+                    </p>
+                    <p
+                      style={{
+                        fontSize: "0.85rem",
+                        color: "var(--text-muted)",
+                      }}
+                    >
+                      Supports JPG, PNG, GIF
+                    </p>
+                  </div>
+                )}
+                {isUploading && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: "rgba(0,0,0,0.3)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "var(--radius-md)",
+                    }}
+                  >
+                    <span className="loading-spinner" />
+                  </div>
+                )}
+              </div>
+              {warning && (
+                <p
+                  style={{
+                    color: "var(--danger)",
+                    fontSize: "0.85rem",
+                    marginTop: "8px",
+                  }}
+                >
+                  ⚠️ {warning}
+                </p>
               )}
             </div>
 
@@ -186,13 +415,12 @@ export default function CreatePetitionPage() {
                 />
               </div>
 
-              <div className="form-group"
-              >
+              <div className="form-group">
                 <label className="form-label">
                   Deadline <span className="form-hint">(optional)</span>
                 </label>
                 <input
-                 style={{cursor:"pointer"}}
+                  style={{ cursor: "pointer" }}
                   type="datetime-local"
                   className="form-input"
                   value={deadline}
@@ -216,6 +444,25 @@ export default function CreatePetitionPage() {
                 ⚠️{" "}
                 {(error as Error).message?.slice(0, 200) ||
                   "Transaction failed"}
+              </div>
+            )}
+
+            {!isFree && (
+              <div
+                style={{
+                  padding: "12px 16px",
+                  borderRadius: "var(--radius-md)",
+                  background: "rgba(var(--primary-rgb, 99, 102, 241), 0.1)",
+                  border:
+                    "1px solid rgba(var(--primary-rgb, 99, 102, 241), 0.2)",
+                  marginBottom: "16px",
+                  fontSize: "0.9rem",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                Creation fee: <strong>{feeInEth} ETH</strong>
               </div>
             )}
 

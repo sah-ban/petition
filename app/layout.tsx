@@ -12,9 +12,12 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://onchainpetition.xyz",
+    process.env.NEXT_PUBLIC_APP_URL || "https://basepetition.xyz",
   ),
-  title: "On-Chain Petition — Create & Sign Petitions On-Chain",
+  title: {
+    template: "BasePetition | %s",
+    default: "BasePetition | Explore",
+  },
   description:
     "Create, sign, and track petitions on the blockchain. Transparent, immutable, and decentralized.",
 };

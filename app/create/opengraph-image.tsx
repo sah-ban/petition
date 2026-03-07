@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
-export const alt = "Create a Petition — On-Chain Petition";
+export const alt = "Create a Petition — BasePetition";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
@@ -94,7 +94,7 @@ export default function OGImage() {
           fontWeight: 500,
         }}
       >
-        on-chain-petition.app
+        basepetition.xyz
       </div>
     </div>,
     { ...size },

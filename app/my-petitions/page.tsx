@@ -10,6 +10,7 @@ import {
 } from "wagmi";
 import { PETITION_ABI, PETITION_CONTRACT_ADDRESS } from "@/lib/contract";
 import Link from "next/link";
+import AdminPanel from "@/components/AdminPanel";
 
 interface Petition {
   id: bigint;
@@ -354,6 +355,7 @@ export default function MyPetitionsPage() {
 
   return (
     <div className="my-petitions-page animate-fade-in-up">
+      <AdminPanel />
       <h1
         style={{
           fontSize: "1.8rem",

@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Image from "next/image";
+
 export default function Header() {
   const pathname = usePathname();
 
@@ -10,7 +12,14 @@ export default function Header() {
     <header className="header">
       <div className="header-inner">
         <Link href="/" className="logo">
-          <span>Onchain Petition</span>
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={32}
+            height={32}
+            style={{ borderRadius: "10%" }}
+          />
+          <span>BasePetition</span>
         </Link>
 
         <nav className="nav-links">
