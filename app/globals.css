@@ -809,6 +809,15 @@ body {
     grid-template-columns: 1fr;
   }
 
+  .detail-stats {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .detail-stat:first-child {
+    grid-column: 1 / -1;
+  }
+
   .form-card {
     padding: 20px;
   }
