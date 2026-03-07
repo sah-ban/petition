@@ -8,7 +8,11 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { PETITION_ABI, PETITION_CONTRACT_ADDRESS } from "@/lib/contract";
+import {
+  PETITION_ABI,
+  PETITION_CONTRACT_ADDRESS,
+  BASE_CHAIN_ID,
+} from "@/lib/contract";
 import Link from "next/link";
 import AdminPanel from "@/components/AdminPanel";
 
@@ -68,6 +72,7 @@ function EditModal({
         BigInt(targetGoal || "0"),
         deadlineTimestamp,
       ],
+      chainId: BASE_CHAIN_ID,
     });
   };
 
@@ -307,6 +312,7 @@ function CloseButton({ petitionId }: { petitionId: bigint }) {
             abi: PETITION_ABI,
             functionName: "closePetition",
             args: [petitionId],
+            chainId: BASE_CHAIN_ID,
           });
         }
       }}
@@ -335,6 +341,7 @@ export default function MyPetitionsPage() {
     functionName: "getMyPetitions",
     account: address,
     query: { enabled: isConnected && mounted },
+    chainId: BASE_CHAIN_ID,
   });
 
   const petitions = (myPetitions as Petition[] | undefined) || [];

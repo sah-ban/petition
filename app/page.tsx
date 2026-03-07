@@ -1,7 +1,11 @@
 "use client";
 
 import { useReadContract } from "wagmi";
-import { PETITION_ABI, PETITION_CONTRACT_ADDRESS } from "@/lib/contract";
+import {
+  PETITION_ABI,
+  PETITION_CONTRACT_ADDRESS,
+  BASE_CHAIN_ID,
+} from "@/lib/contract";
 import PetitionCard from "@/components/PetitionCard";
 import Link from "next/link";
 
@@ -24,6 +28,7 @@ function PetitionLoader({ petitionId }: { petitionId: number }) {
     abi: PETITION_ABI,
     functionName: "getPetition",
     args: [BigInt(petitionId)],
+    chainId: BASE_CHAIN_ID,
   });
 
   if (!petition) {
@@ -56,6 +61,7 @@ export default function HomePage() {
     address: PETITION_CONTRACT_ADDRESS,
     abi: PETITION_ABI,
     functionName: "getTotalPetitions",
+    chainId: BASE_CHAIN_ID,
   });
 
   const total = totalPetitions ? Number(totalPetitions) : 0;
@@ -68,8 +74,9 @@ export default function HomePage() {
         <div className="container animate-fade-in-up">
           <h1>Petitions On-Chain</h1>
           <p>
-            Create and sign petitions on the blockchain. Every signature is
-            transparent, immutable, and verifiable.
+            A decentralized petition platform built on Base. <br />
+            Create and sign petitions where every signature is transparent,
+            immutable, and verifiable.
           </p>
           <Link href="/create" className="btn btn-primary btn-lg">
             <svg
@@ -88,21 +95,6 @@ export default function HomePage() {
             </svg>
             Create a Petition
           </Link>
-
-          <div className="hero-stats">
-            <div className="stat-item">
-              <div className="stat-value">{total}</div>
-              <div className="stat-label">Petitions</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">🔗</div>
-              <div className="stat-label">On-Chain</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-value">∞</div>
-              <div className="stat-label">Immutable</div>
-            </div>
-          </div>
         </div>
       </section>
 

@@ -9,7 +9,11 @@ import {
   useReadContract,
 } from "wagmi";
 import { formatEther, parseEventLogs } from "viem";
-import { PETITION_ABI, PETITION_CONTRACT_ADDRESS } from "@/lib/contract";
+import {
+  PETITION_ABI,
+  PETITION_CONTRACT_ADDRESS,
+  BASE_CHAIN_ID,
+} from "@/lib/contract";
 
 export default function CreatePetitionPage() {
   const router = useRouter();
@@ -19,6 +23,7 @@ export default function CreatePetitionPage() {
     address: PETITION_CONTRACT_ADDRESS,
     abi: PETITION_ABI,
     functionName: "getCreationFee",
+    chainId: BASE_CHAIN_ID,
   });
 
   const feeInEth = creationFee ? formatEther(creationFee as bigint) : "0";
@@ -140,6 +145,7 @@ export default function CreatePetitionPage() {
       ...(creationFee && (creationFee as bigint) > 0n
         ? { value: creationFee as bigint }
         : {}),
+      chainId: BASE_CHAIN_ID,
     });
   };
 

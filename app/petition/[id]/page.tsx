@@ -8,8 +8,13 @@ import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useEnsName,
 } from "wagmi";
-import { PETITION_ABI, PETITION_CONTRACT_ADDRESS } from "@/lib/contract";
+import {
+  PETITION_ABI,
+  PETITION_CONTRACT_ADDRESS,
+  BASE_CHAIN_ID,
+} from "@/lib/contract";
 import Link from "next/link";
 
 interface PetitionDetailPageProps {
@@ -32,6 +37,7 @@ export default function PetitionDetailPage({
     abi: PETITION_ABI,
     functionName: "getPetition",
     args: [petitionId],
+    chainId: BASE_CHAIN_ID,
   });
 
   const { data: signersList, refetch: refetchSigners } = useReadContract({
@@ -39,6 +45,7 @@ export default function PetitionDetailPage({
     abi: PETITION_ABI,
     functionName: "getSigners",
     args: [petitionId],
+    chainId: BASE_CHAIN_ID,
   });
 
   const { data: hasSigned } = useReadContract({
@@ -47,6 +54,7 @@ export default function PetitionDetailPage({
     functionName: "hasAddressSigned",
     args: [petitionId, address as `0x${string}`],
     query: { enabled: !!address },
+    chainId: BASE_CHAIN_ID,
   });
 
   const { data: isActive } = useReadContract({
@@ -54,9 +62,17 @@ export default function PetitionDetailPage({
     abi: PETITION_ABI,
     functionName: "isPetitionActive",
     args: [petitionId],
+    chainId: BASE_CHAIN_ID,
   });
 
   const { writeContract, data: txHash, isPending, error } = useWriteContract();
+
+  const { data: ensName } = useEnsName({
+    address: petition
+      ? (petition as { creator: `0x${string}` }).creator
+      : undefined,
+    chainId: 1,
+  });
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
@@ -75,6 +91,7 @@ export default function PetitionDetailPage({
       abi: PETITION_ABI,
       functionName: "signPetition",
       args: [petitionId],
+      chainId: BASE_CHAIN_ID,
     });
   };
 
@@ -231,8 +248,8 @@ export default function PetitionDetailPage({
         <h1 className="detail-title">{p.title}</h1>
         <div className="detail-creator" style={{ alignItems: "center" }}>
           Created by{" "}
-          <code>
-            {truncateAddress(p.creator)}
+          <code title={p.creator}>
+            {ensName || truncateAddress(p.creator)}
             <button
               style={{
                 display: "inline-flex",

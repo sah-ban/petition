@@ -41,70 +41,83 @@ export default function PetitionCard({ petition }: { petition: Petition }) {
   return (
     <Link
       href={`/petition/${petition.id.toString()}`}
+      className="card animate-fade-in"
       style={{ textDecoration: "none" }}
     >
-      <div className="card animate-fade-in">
-        <div className="card-content">
-          {petition.imageUrl && (
-            <img
-              src={petition.imageUrl}
-              alt={petition.title}
-              className="card-image"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
-            />
-          )}
+      <div className="card-content">
+        <img
+          src={petition.imageUrl || "/fallback.png"}
+          alt={petition.title}
+          className="card-image"
+          onError={(e) => {
+            (e.target as HTMLImageElement).src = "/fallback.png";
+          }}
+        />
 
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "12px",
-            }}
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: "12px",
+          }}
+        >
+          <span
+            className={`badge ${
+              !isActive
+                ? "badge-closed"
+                : isExpired
+                  ? "badge-expired"
+                  : "badge-active"
+            }`}
           >
-            <span
-              className={`badge ${
-                !isActive
-                  ? "badge-closed"
-                  : isExpired
-                    ? "badge-expired"
-                    : "badge-active"
-              }`}
-            >
-              {!isActive ? "Closed" : isExpired ? "Expired" : "Active"}
+            {!isActive ? "Closed" : isExpired ? "Expired" : "Active"}
+          </span>
+          {createdDate && (
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+              {createdDate}
             </span>
-            {createdDate && (
-              <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                {createdDate}
-              </span>
-            )}
-          </div>
-
-          <h3 className="card-title">{petition.title}</h3>
-
-          {petition.description && (
-            <p className="card-description">{petition.description}</p>
           )}
+        </div>
 
-          {petition.targetGoal > 0n && (
-            <>
-              <div className="progress-bar">
-                <div
-                  className="progress-fill"
-                  style={{ width: `${Math.min(progress, 100)}%` }}
-                />
-              </div>
-              <div className="progress-text">
-                <span>{petition.signatureCount.toString()} signatures</span>
-                <span>Goal: {petition.targetGoal.toString()}</span>
-              </div>
-            </>
-          )}
+        <h3 className="card-title">{petition.title}</h3>
 
-          <div className="card-footer" style={{ marginTop: "12px" }}>
-            <div className="card-meta">
+        {petition.description && (
+          <p className="card-description">{petition.description}</p>
+        )}
+
+        {petition.targetGoal > 0n && (
+          <>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${Math.min(progress, 100)}%` }}
+              />
+            </div>
+            <div className="progress-text">
+              <span>{petition.signatureCount.toString()} signatures</span>
+              <span>Goal: {petition.targetGoal.toString()}</span>
+            </div>
+          </>
+        )}
+
+        <div className="card-footer">
+          <div className="card-meta">
+            <div className="card-meta-item">
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              {petition.signatureCount.toString()} signed
+            </div>
+            {deadlineDate && (
               <div className="card-meta-item">
                 <svg
                   viewBox="0 0 24 24"
@@ -112,28 +125,12 @@ export default function PetitionCard({ petition }: { petition: Petition }) {
                   stroke="currentColor"
                   strokeWidth="2"
                 >
-                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                  <circle cx="9" cy="7" r="4" />
-                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
                 </svg>
-                {petition.signatureCount.toString()} signed
+                {deadlineDate}
               </div>
-              {deadlineDate && (
-                <div className="card-meta-item">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <circle cx="12" cy="12" r="10" />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
-                  {deadlineDate}
-                </div>
-              )}
-            </div>
+            )}
           </div>
         </div>
       </div>

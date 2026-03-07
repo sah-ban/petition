@@ -8,8 +8,12 @@ import {
   useWaitForTransactionReceipt,
   useBalance,
 } from "wagmi";
+import {
+  PETITION_ABI,
+  PETITION_CONTRACT_ADDRESS,
+  BASE_CHAIN_ID,
+} from "@/lib/contract";
 import { parseEther, parseUnits, formatEther } from "viem";
-import { PETITION_ABI, PETITION_CONTRACT_ADDRESS } from "@/lib/contract";
 
 export default function AdminPanel() {
   const { address, isConnected } = useAccount();
@@ -23,16 +27,19 @@ export default function AdminPanel() {
     address: PETITION_CONTRACT_ADDRESS,
     abi: PETITION_ABI,
     functionName: "owner",
+    chainId: BASE_CHAIN_ID,
   });
 
   const { data: currentFee } = useReadContract({
     address: PETITION_CONTRACT_ADDRESS,
     abi: PETITION_ABI,
     functionName: "getCreationFee",
+    chainId: BASE_CHAIN_ID,
   });
 
   const { data: contractBalance } = useBalance({
     address: PETITION_CONTRACT_ADDRESS,
+    chainId: BASE_CHAIN_ID,
   });
 
   const {
@@ -99,6 +106,7 @@ export default function AdminPanel() {
         abi: PETITION_ABI,
         functionName: "setCreationFee",
         args: [feeInWei],
+        chainId: BASE_CHAIN_ID,
       });
     } catch (err) {
       console.error("Invalid fee amount", err);
@@ -110,6 +118,7 @@ export default function AdminPanel() {
       address: PETITION_CONTRACT_ADDRESS,
       abi: PETITION_ABI,
       functionName: "withdrawAll",
+      chainId: BASE_CHAIN_ID,
     });
   };
 
@@ -121,6 +130,7 @@ export default function AdminPanel() {
       abi: PETITION_ABI,
       functionName: "transferOwnership",
       args: [newOwnerAddress as `0x${string}`],
+      chainId: BASE_CHAIN_ID,
     });
   };
 
@@ -135,6 +145,7 @@ export default function AdminPanel() {
         abi: PETITION_ABI,
         functionName: "recoverERC20",
         args: [tokenAddress as `0x${string}`, amountInUnits],
+        chainId: BASE_CHAIN_ID,
       });
     } catch (err) {
       console.error("Invalid token amount or decimals", err);
@@ -404,6 +415,7 @@ export default function AdminPanel() {
                   title="Token Decimals (default 18)"
                 />
                 <button
+                  style={{ padding: "14px" }}
                   type="submit"
                   className="btn btn-primary btn-sm"
                   disabled={
