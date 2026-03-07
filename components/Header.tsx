@@ -41,6 +41,12 @@ export default function Header() {
           >
             My Petitions
           </Link>
+          <Link
+            href="/faq"
+            className={`nav-link ${pathname === "/faq" ? "active" : ""}`}
+          >
+            FAQ
+          </Link>
         </nav>
 
         <div className="header-right">
