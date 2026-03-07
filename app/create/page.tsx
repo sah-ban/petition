@@ -68,28 +68,26 @@ export default function CreatePetitionPage() {
     setIsUploading(true);
     setWarning(null);
     const formData = new FormData();
-    formData.append("image", image);
+    formData.append("file", image);
     try {
-      const response = await fetch(
-        `https://api.imgbb.com/1/upload?key=${process.env.NEXT_PUBLIC_IMGBB_KEY}`,
-        {
-          method: "POST",
-          body: formData,
-        },
-      );
+      const response = await fetch("/api/upload-ipfs", {
+        method: "POST",
+        body: formData,
+      });
 
-      const data: {
-        success: boolean;
-        data?: { url: string };
-        error?: { message: string };
-      } = await response.json();
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        setWarning(`Upload failed: ${errData.error || response.statusText}`);
+        return;
+      }
 
-      if (data.success && data.data) {
-        setImageUrl(data.data.url);
+      const data = await response.json();
+
+      if (data.IpfsHash) {
+        // Use a generic public IPFS gateway or Pinata's gateway. Pinata's usually works best for pinned content.
+        setImageUrl(`https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`);
       } else {
-        setWarning(
-          "Upload failed: " + (data.error?.message || "Unknown error"),
-        );
+        setWarning("Upload failed: No IPFS hash returned");
       }
     } catch (error) {
       console.error("Error uploading image:", error);
