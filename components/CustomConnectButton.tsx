@@ -3,6 +3,7 @@
 import { useAccount, useConnect, useDisconnect, useSwitchChain } from "wagmi";
 import { useState, useRef, useEffect } from "react";
 import { base } from "wagmi/chains";
+import Image from "next/image";
 
 export function CustomConnectButton() {
   const { address, isConnected, chainId } = useAccount();
@@ -49,8 +50,14 @@ export function CustomConnectButton() {
     }
 
     return (
-      <button onClick={() => disconnect()} className="btn btn-secondary btn-sm">
-        Disconnect {address?.slice(0, 6)}...{address?.slice(-4)}
+      <button
+        onClick={() => disconnect()}
+        className="flex gap-2 btn btn-secondary btn-sm"
+      >
+        <code className="text-sm">
+          {address?.slice(0, 6)}...{address?.slice(-4)}
+        </code>
+        <Image src="/disconnect.svg" alt="Disconnect" width={20} height={20} />
       </button>
     );
   }
