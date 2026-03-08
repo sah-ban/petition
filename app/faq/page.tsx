@@ -24,7 +24,7 @@ const faqs = [
             </li>
             <li>Click &quot;Create a Petition&quot;</li>
             <li>Fill in your petition title, description, and goal</li>
-            <li>Submit opengrapg your petition is recorded on-chain</li>
+            <li>Submit your petition to record it on-chain</li>
           </ol>
         ),
       },
