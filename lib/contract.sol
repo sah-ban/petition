@@ -200,9 +200,6 @@ contract OnChainPetition {
     /// @notice Update a petition (only creator)
     function updatePetition(
         uint256 _petitionId,
-        string calldata _title,
-        string calldata _description,
-        string calldata _imageUrl,
         uint256 _targetGoal,
         uint256 _deadline
     )
@@ -215,18 +212,6 @@ contract OnChainPetition {
 
         bool updated = false;
 
-        if (bytes(_title).length > 0) {
-            p.title = _title;
-            updated = true;
-        }
-        if (bytes(_description).length > 0) {
-            p.description = _description;
-            updated = true;
-        }
-        if (bytes(_imageUrl).length > 0) {
-            p.imageUrl = _imageUrl;
-            updated = true;
-        }
         if (_targetGoal != 0) {
             p.targetGoal = _targetGoal;
             updated = true;
