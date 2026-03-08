@@ -110,7 +110,9 @@ export function CustomConnectButton() {
                   e.currentTarget.style.background = "transparent";
                 }}
               >
-                {connector.name}
+                {connector.name === "Injected"
+                  ? "Browser Wallet"
+                  : connector.name}
                 {isPending &&
                   // @ts-expect-error - connector runtime object has id but TS infers CreateConnectorFn
                   connector.id === variables?.connector?.id &&
