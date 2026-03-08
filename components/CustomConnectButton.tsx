@@ -6,7 +6,7 @@ import { base } from "wagmi/chains";
 
 export function CustomConnectButton() {
   const { address, isConnected, chainId } = useAccount();
-  const { connect, connectors, isPending, variables } = useConnect();
+  const { connect, connectors, isPending, variables, error } = useConnect();
   const { switchChain, isPending: isSwitchPending } = useSwitchChain();
   const { disconnect } = useDisconnect();
   const [isOpen, setIsOpen] = useState(false);
@@ -89,7 +89,6 @@ export function CustomConnectButton() {
                 key={connector.id}
                 onClick={() => {
                   connect({ connector });
-                  setIsOpen(false);
                 }}
                 className="btn btn-secondary btn-sm wallet-option"
                 style={{
@@ -119,6 +118,27 @@ export function CustomConnectButton() {
                   " (connecting)"}
               </button>
             ))}
+          {error && (
+            <div
+              style={{
+                color: "var(--danger)",
+                fontSize: "0.75rem",
+                padding: "8px",
+                textAlign: "center",
+                marginTop: "4px",
+                borderTop: "1px solid var(--border-primary)",
+                background: "rgba(240, 60, 60, 0.1)",
+                borderRadius: "var(--radius-sm)",
+              }}
+            >
+              ⚠️{" "}
+              {error.message.toLowerCase().includes("connector not found") ||
+              error.message.toLowerCase().includes("provider not found") ||
+              error.message.toLowerCase().includes("not injected")
+                ? "Wallet extension not detected. Please install a wallet (e.g., MetaMask or Rabby)."
+                : error.message.split("\n")[0]}
+            </div>
+          )}
         </div>
       )}
     </div>
