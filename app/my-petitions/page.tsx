@@ -37,9 +37,6 @@ function EditModal({
   petition: Petition;
   onClose: () => void;
 }) {
-  const [title, setTitle] = useState(petition.title);
-  const [description, setDescription] = useState(petition.description);
-  const [imageUrl, setImageUrl] = useState(petition.imageUrl);
   const [targetGoal, setTargetGoal] = useState(
     petition.targetGoal > 0n ? petition.targetGoal.toString() : "",
   );
@@ -48,64 +45,6 @@ function EditModal({
       ? new Date(Number(petition.deadline) * 1000).toISOString().slice(0, 16)
       : "",
   );
-  const [isUploading, setIsUploading] = useState(false);
-  const [warning, setWarning] = useState<string | null>(null);
-
-  const uploadImage = async (image: File) => {
-    setIsUploading(true);
-    setWarning(null);
-    const formData = new FormData();
-    formData.append("file", image);
-    try {
-      const response = await fetch("/api/upload-ipfs", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errData = await response.json().catch(() => ({}));
-        setWarning(`Upload failed: ${errData.error || response.statusText}`);
-        return;
-      }
-
-      const data = await response.json();
-
-      if (data.IpfsHash) {
-        setImageUrl(`https://gateway.pinata.cloud/ipfs/${data.IpfsHash}`);
-      } else {
-        setWarning("Upload failed: No IPFS hash returned");
-      }
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      setWarning("Error uploading image. Please check your connection.");
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const image = e.target.files[0];
-      if (image.type.startsWith("image/")) {
-        await uploadImage(image);
-      } else {
-        setWarning("Invalid file type. Please upload an image or GIF.");
-      }
-    }
-  };
-
-  const handlePaste = async (e: React.ClipboardEvent) => {
-    const items = e.clipboardData.items;
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf("image") !== -1) {
-        const file = items[i].getAsFile();
-        if (file) {
-          await uploadImage(file);
-          break;
-        }
-      }
-    }
-  };
 
   const { writeContract, data: txHash, isPending, error } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
@@ -123,14 +62,7 @@ function EditModal({
       address: PETITION_CONTRACT_ADDRESS,
       abi: PETITION_ABI,
       functionName: "updatePetition",
-      args: [
-        petition.id,
-        title.trim(),
-        description.trim(),
-        imageUrl.trim(),
-        BigInt(targetGoal || "0"),
-        deadlineTimestamp,
-      ],
+      args: [petition.id, BigInt(targetGoal || "0"), deadlineTimestamp],
       chainId: BASE_CHAIN_ID,
     });
   };
@@ -225,182 +157,6 @@ function EditModal({
         </p>
 
         <form onSubmit={handleUpdate}>
-          <div className="form-group">
-            <label className="form-label">New Title</label>
-            <input
-              type="text"
-              className="form-input"
-              placeholder={petition.title}
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">New Description</label>
-            <textarea
-              className="form-textarea"
-              placeholder={petition.description || "Add a description..."}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">
-              New Image{" "}
-              <span className="form-hint">(optional - paste or upload)</span>
-            </label>
-            <div
-              onPaste={handlePaste}
-              style={{
-                border: "2px dashed var(--border-color)",
-                borderRadius: "var(--radius-md)",
-                padding: "20px",
-                textAlign: "center",
-                cursor: "pointer",
-                background: "rgba(255, 255, 255, 0.02)",
-                transition: "all 0.2s ease",
-                position: "relative",
-              }}
-              className="hover-glow"
-              onClick={() =>
-                document.getElementById("image-upload-edit")?.click()
-              }
-            >
-              <input
-                id="image-upload-edit"
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                style={{ display: "none" }}
-              />
-
-              {imageUrl ? (
-                <div style={{ position: "relative" }}>
-                  <img
-                    src={imageUrl}
-                    alt="Preview"
-                    style={{
-                      maxHeight: "300px",
-                      borderRadius: "var(--radius-sm)",
-                      objectFit: "cover",
-                      width: "100%",
-                    }}
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setImageUrl("");
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "10px",
-                      right: "10px",
-                      background: "rgba(0,0,0,0.6)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "50%",
-                      width: "32px",
-                      height: "32px",
-                      cursor: "pointer",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "18px",
-                    }}
-                  >
-                    ×
-                  </button>
-                  <p
-                    style={{
-                      marginTop: "8px",
-                      fontSize: "0.85rem",
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    Click or paste to replace image
-                  </p>
-                </div>
-              ) : (
-                <div style={{ padding: "40px 20px" }}>
-                  <div
-                    style={{
-                      fontSize: "2rem",
-                      marginBottom: "12px",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      display: "flex",
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="size-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6.827 6.175A2.31 2.31 0 0 1 5.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 0 0 2.25 2.25h15A2.25 2.25 0 0 0 21.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 0 0-1.134-.175 2.31 2.31 0 0 1-1.64-1.055l-.822-1.316a2.192 2.192 0 0 0-1.736-1.039 48.774 48.774 0 0 0-5.232 0 2.192 2.192 0 0 0-1.736 1.039l-.821 1.316Z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M16.5 12.75a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0ZM18.75 10.5h.008v.008h-.008V10.5Z"
-                      />
-                    </svg>
-                  </div>
-                  <p style={{ fontWeight: 500, marginBottom: "4px" }}>
-                    {isUploading
-                      ? "Uploading..."
-                      : "Click to upload or paste image"}
-                  </p>
-                  <p
-                    style={{
-                      fontSize: "0.85rem",
-                      color: "var(--text-muted)",
-                    }}
-                  >
-                    Supports JPG, PNG, GIF
-                  </p>
-                </div>
-              )}
-              {isUploading && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: "rgba(0,0,0,0.3)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: "var(--radius-md)",
-                  }}
-                >
-                  <span className="loading-spinner" />
-                </div>
-              )}
-            </div>
-            {warning && (
-              <p
-                style={{
-                  color: "var(--danger)",
-                  fontSize: "0.85rem",
-                  marginTop: "8px",
-                }}
-              >
-                ⚠️ {warning}
-              </p>
-            )}
-          </div>
-
           <div
             style={{
               display: "grid",
