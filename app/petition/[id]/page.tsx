@@ -16,6 +16,7 @@ import {
   BASE_CHAIN_ID,
 } from "@/lib/contract";
 import Link from "next/link";
+import { CustomConnectButton } from "@/components/CustomConnectButton";
 
 interface PetitionDetailPageProps {
   params: Promise<{ id: string }>;
@@ -392,7 +393,16 @@ export default function PetitionDetailPage({
             className="form-card"
             style={{ textAlign: "center", padding: "32px" }}
           >
-            <p style={{ color: "var(--text-secondary)", marginBottom: "8px" }}>
+            <div style={{ display: "flex", justifyContent: "center" }}>
+              <CustomConnectButton />
+            </div>
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                marginTop: "12px",
+                fontSize: "0.9rem",
+              }}
+            >
               Connect your wallet to sign this petition
             </p>
           </div>
