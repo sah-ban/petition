@@ -14,6 +14,7 @@ import {
   PETITION_CONTRACT_ADDRESS,
   BASE_CHAIN_ID,
 } from "@/lib/contract";
+import { CustomConnectButton } from "@/components/CustomConnectButton";
 
 export default function CreatePetitionPage() {
   const router = useRouter();
@@ -209,7 +210,15 @@ export default function CreatePetitionPage() {
           style={{ textAlign: "center", padding: "60px 32px" }}
         >
           <div style={{ fontSize: "3rem", marginBottom: "16px" }}>🔗</div>
-          <h3 style={{ marginBottom: "8px" }}>Connect Your Wallet</h3>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "16px",
+            }}
+          >
+            <CustomConnectButton />
+          </div>
           <p style={{ color: "var(--text-secondary)" }}>
             Please connect your wallet to create a petition.
           </p>

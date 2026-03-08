@@ -15,6 +15,7 @@ import {
 } from "@/lib/contract";
 import Link from "next/link";
 import AdminPanel from "@/components/AdminPanel";
+import { CustomConnectButton } from "@/components/CustomConnectButton";
 
 interface Petition {
   id: bigint;
@@ -555,7 +556,15 @@ export default function MyPetitionsPage() {
       <div className="my-petitions-page">
         <div className="empty-state">
           <div className="empty-icon">🔗</div>
-          <h3>Connect Your Wallet</h3>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "16px",
+            }}
+          >
+            <CustomConnectButton />
+          </div>
           <p>Connect your wallet to view petitions you&apos;ve created.</p>
         </div>
       </div>
