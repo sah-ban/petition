@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { CustomConnectButton } from "./CustomConnectButton";
 import Image from "next/image";
 
 export default function Header() {
@@ -50,11 +50,7 @@ export default function Header() {
         </nav>
 
         <div className="header-right">
-          <ConnectButton
-            chainStatus="icon"
-            showBalance={false}
-            accountStatus="avatar"
-          />
+          <CustomConnectButton />
         </div>
       </div>
     </header>
