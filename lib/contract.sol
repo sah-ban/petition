@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-contract OnChainPetition {
+contract BasePetition {
 
     // ──────────────────────────── Types ────────────────────────────
 
@@ -19,6 +19,7 @@ contract OnChainPetition {
         uint256 signatureCount;
         Status status;
         uint256 createdAt;
+        bool isHidden;
     }
 
     // ──────────────────────────── State ────────────────────────────
@@ -57,6 +58,11 @@ contract OnChainPetition {
     event PetitionUpdated(
         uint256 indexed petitionId,
         address indexed updatedBy
+    );
+
+    event PetitionVisibilityToggled(
+        uint256 indexed petitionId,
+        bool isHidden
     );
 
     event CreationFeeUpdated(
@@ -163,6 +169,12 @@ contract OnChainPetition {
         emit TokenRecovered(tokenAddress, owner, tokenAmount);
     }
 
+    /// @notice Toggle visibility of a petition for moderation
+    function togglePetitionVisibility(uint256 _petitionId) external onlyOwner petitionExists(_petitionId) {
+        petitions[_petitionId].isHidden = !petitions[_petitionId].isHidden;
+        emit PetitionVisibilityToggled(_petitionId, petitions[_petitionId].isHidden);
+    }
+
     // ──────────────────────────── Write Functions ────────────────────────────
 
     /// @notice Create a new petition (requires ETH fee if creationFee > 0)
@@ -189,7 +201,8 @@ contract OnChainPetition {
             deadline: _deadline,
             signatureCount: 0,
             status: Status.Active,
-            createdAt: block.timestamp
+            createdAt: block.timestamp,
+            isHidden: false
         });
 
         creatorPetitions[msg.sender].push(petitionId);
