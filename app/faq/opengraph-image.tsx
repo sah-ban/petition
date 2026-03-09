@@ -94,7 +94,7 @@ export default function OGImage() {
           fontWeight: 500,
         }}
       >
-        basepetition.xyz
+        basepetition.com
       </div>
     </div>,
     { ...size },
