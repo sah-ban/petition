@@ -17,6 +17,7 @@ import {
 } from "@/lib/contract";
 import Link from "next/link";
 import { CustomConnectButton } from "@/components/CustomConnectButton";
+import sdk from "@farcaster/miniapp-sdk";
 
 interface PetitionDetailPageProps {
   params: Promise<{ id: string }>;
@@ -213,6 +214,32 @@ export default function PetitionDetailPage({
     );
   };
 
+  const handleShareFarcaster = async () => {
+    try {
+      if (typeof window !== "undefined") {
+        const shareText = `${p.title}\n\nSign this petition on BasePetition 👇`;
+        const isMiniApp = await sdk.isInMiniApp();
+
+        if (isMiniApp) {
+          await sdk.actions.composeCast({
+            text: shareText,
+            embeds: [petitionUrl],
+          });
+        } else {
+          const encodedText = encodeURIComponent(shareText);
+          const encodedEmbed = encodeURIComponent(petitionUrl);
+          window.open(
+            `https://warpcast.com/~/compose?text=${encodedText}&embeds[]=${encodedEmbed}`,
+            "_blank",
+            "noopener,noreferrer",
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Failed to share to farcaster", err);
+    }
+  };
+
   return (
     <div className="detail-page animate-fade-in-up">
       <Link
@@ -345,6 +372,13 @@ export default function PetitionDetailPage({
           </button>
           <button className="btn btn-secondary btn-sm" onClick={handleShareX}>
             Share on 𝕏
+          </button>
+          <button
+            className="btn btn-secondary btn-sm"
+            onClick={handleShareFarcaster}
+
+          >
+            Share on Farcaster
           </button>
 
           {isConnected && owner && address === owner && (
