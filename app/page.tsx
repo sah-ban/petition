@@ -21,6 +21,7 @@ interface Petition {
   signatureCount: bigint;
   status: number;
   createdAt: bigint;
+  isHidden: boolean;
 }
 
 function PetitionLoader() {
@@ -80,7 +81,9 @@ export default function HomePage() {
 
   // Reverse the fetched array to maintain newest-first order within the page.
   const petitionsToDisplay = paginatedPetitions
-    ? [...(paginatedPetitions as Petition[])].reverse()
+    ? [...(paginatedPetitions as Petition[])]
+        .filter((p) => !p.isHidden)
+        .reverse()
     : [];
 
   const isLoading = isTotalLoading || isPetitionsLoading;
