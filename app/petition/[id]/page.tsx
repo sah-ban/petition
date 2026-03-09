@@ -66,6 +66,13 @@ export default function PetitionDetailPage({
     chainId: BASE_CHAIN_ID,
   });
 
+  const { data: owner } = useReadContract({
+    address: PETITION_CONTRACT_ADDRESS,
+    abi: PETITION_ABI,
+    functionName: "owner",
+    chainId: BASE_CHAIN_ID,
+  });
+
   const { writeContract, data: txHash, isPending, error } = useWriteContract();
 
   const { data: ensName } = useEnsName({
@@ -152,6 +159,7 @@ export default function PetitionDetailPage({
     signatureCount: bigint;
     status: number;
     createdAt: bigint;
+    isHidden: boolean;
   };
 
   const progress =
@@ -221,6 +229,23 @@ export default function PetitionDetailPage({
       >
         ← Back to all petitions
       </Link>
+
+      {p.isHidden && (
+        <div
+          style={{
+            background: "var(--danger-bg, #fee2e2)",
+            color: "var(--danger, #ef4444)",
+            border: "1px solid rgba(239, 68, 68, 0.4)",
+            padding: "12px",
+            borderRadius: "var(--radius-md)",
+            marginBottom: "24px",
+            textAlign: "center",
+            fontWeight: 600,
+          }}
+        >
+          ⚠️ This petition is hidden and requires admin review.
+        </div>
+      )}
 
       <div className="detail-header">
         <div
@@ -321,6 +346,34 @@ export default function PetitionDetailPage({
           <button className="btn btn-secondary btn-sm" onClick={handleShareX}>
             Share on 𝕏
           </button>
+
+          {isConnected && owner && address === owner && (
+            <button
+              className={`btn ${p.isHidden ? "btn-primary" : "btn-danger"} btn-sm`}
+              onClick={() => {
+                if (
+                  confirm(
+                    `Are you sure you want to ${p.isHidden ? "UNHIDE" : "HIDE"} this petition?`,
+                  )
+                ) {
+                  writeContract({
+                    address: PETITION_CONTRACT_ADDRESS,
+                    abi: PETITION_ABI,
+                    functionName: "togglePetitionVisibility",
+                    args: [petitionId],
+                    chainId: BASE_CHAIN_ID,
+                  });
+                }
+              }}
+              disabled={isPending || isConfirming}
+            >
+              {isPending || isConfirming
+                ? "⏳"
+                : p.isHidden
+                  ? "👁️ Unhide Petition"
+                  : "🚫 Hide Petition"}
+            </button>
+          )}
         </div>
       </div>
 
