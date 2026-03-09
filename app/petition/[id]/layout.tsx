@@ -32,14 +32,60 @@ export async function generateMetadata({
       ? petition.description.slice(0, 160)
       : `Sign this petition on-chain. ${petition?.signatureCount?.toString() ?? "0"} signatures so far.`;
 
-    return { title, description: desc };
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL || "https://basepetition.com";
+    const petitionUrl = `${appUrl}/petition/${id}`;
+
+    const frame = {
+      version: "next",
+      imageUrl: `${petitionUrl}/farcaster-image`,
+      button: {
+        title: "View Petition",
+        action: {
+          type: "launch_frame",
+          name: "BasePetition",
+          url: petitionUrl,
+          splashImageUrl: `${appUrl}/splash.png`,
+          splashBackgroundColor: "#f8fafc",
+        },
+      },
+    };
+
+    return {
+      title,
+      description: desc,
+      other: {
+        "fc:frame": JSON.stringify(frame),
+      },
+    };
   } catch {
     // fallback to default title
   }
 
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://basepetition.com";
+  const petitionUrl = `${appUrl}/petition/${id}`;
+
+  const defaultFrame = {
+    version: "next",
+    imageUrl: `${appUrl}/farcaster-image`,
+    button: {
+      title: "View Petition",
+      action: {
+        type: "launch_frame",
+        name: "BasePetition",
+        url: petitionUrl,
+        splashImageUrl: `${appUrl}/splash.png`,
+        splashBackgroundColor: "#f8fafc",
+      },
+    },
+  };
+
   return {
     title,
     description: `View and sign Petition #${id} on BasePetition.`,
+    other: {
+      "fc:frame": JSON.stringify(defaultFrame),
+    },
   };
 }
 

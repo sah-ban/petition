@@ -10,16 +10,34 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://basepetition.com";
+
+const frame = {
+  version: "next",
+  imageUrl: `${appUrl}/farcaster-image`,
+  button: {
+    title: "Launch BasePetition",
+    action: {
+      type: "launch_frame",
+      name: "BasePetition",
+      url: appUrl,
+      splashImageUrl: `${appUrl}/splash.png`,
+      splashBackgroundColor: "#f8fafc",
+    },
+  },
+};
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://basepetition.xyz",
-  ),
+  metadataBase: new URL(appUrl),
   title: {
     template: "BasePetition | %s",
     default: "BasePetition | Explore",
   },
   description:
     "Create, sign, and track petitions on the blockchain. Transparent, immutable, and decentralized.",
+  other: {
+    "fc:frame": JSON.stringify(frame),
+  },
 };
 
 export default function RootLayout({
