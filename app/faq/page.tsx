@@ -42,7 +42,7 @@ const faqs = [
       },
       {
         q: "Can a petition be modified or closed?",
-        a: 'Yes. As a petition creator, you have the ability to update the title, description, image, goal, or deadline via the "My Petitions" page. You can also permanently close a petition if you no longer want it to receive new signatures.',
+        a: 'Yes, but to ensure trust, the title, description, and image cannot be altered once a petition is created. As a creator, you can only update the target goal or extend the deadline via the "My Petitions" page. You can also permanently close a petition if you no longer want it to receive new signatures. Additionally, admins have the ability to hide petitions that violate community guidelines.',
       },
     ],
   },
