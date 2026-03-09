@@ -1,5 +1,5 @@
 export const PETITION_CONTRACT_ADDRESS =
-  "0xE2C87AE6E84b743253Da23EfBec8D7f5aAb0Db4E" as `0x${string}`;
+  "0x190280297e94e7f9AeBf411d51d85688d93c9Fa8" as `0x${string}`;
 
 export const BASE_CHAIN_ID = 8453;
 
@@ -30,58 +30,6 @@ export const PETITION_ABI = [
 		],
 		"name": "AlreadySigned",
 		"type": "error"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_petitionId",
-				"type": "uint256"
-			}
-		],
-		"name": "closePetition",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "string",
-				"name": "_title",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_description",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "_imageUrl",
-				"type": "string"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_targetGoal",
-				"type": "uint256"
-			},
-			{
-				"internalType": "uint256",
-				"name": "_deadline",
-				"type": "uint256"
-			}
-		],
-		"name": "createPetition",
-		"outputs": [
-			{
-				"internalType": "uint256",
-				"name": "petitionId",
-				"type": "uint256"
-			}
-		],
-		"stateMutability": "payable",
-		"type": "function"
 	},
 	{
 		"inputs": [
@@ -328,48 +276,23 @@ export const PETITION_ABI = [
 		"type": "event"
 	},
 	{
+		"anonymous": false,
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "tokenAddress",
-				"type": "address"
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "petitionId",
+				"type": "uint256"
 			},
 			{
-				"internalType": "uint256",
-				"name": "tokenAmount",
-				"type": "uint256"
+				"indexed": false,
+				"internalType": "bool",
+				"name": "isHidden",
+				"type": "bool"
 			}
 		],
-		"name": "recoverERC20",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_fee",
-				"type": "uint256"
-			}
-		],
-		"name": "setCreationFee",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_petitionId",
-				"type": "uint256"
-			}
-		],
-		"name": "signPetition",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
+		"name": "PetitionVisibilityToggled",
+		"type": "event"
 	},
 	{
 		"anonymous": false,
@@ -399,23 +322,18 @@ export const PETITION_ABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "address",
-				"name": "newOwner",
-				"type": "address"
+				"internalType": "uint256",
+				"name": "_petitionId",
+				"type": "uint256"
 			}
 		],
-		"name": "transferOwnership",
+		"name": "closePetition",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
 		"inputs": [
-			{
-				"internalType": "uint256",
-				"name": "_petitionId",
-				"type": "uint256"
-			},
 			{
 				"internalType": "string",
 				"name": "_title",
@@ -442,16 +360,15 @@ export const PETITION_ABI = [
 				"type": "uint256"
 			}
 		],
-		"name": "updatePetition",
-		"outputs": [],
-		"stateMutability": "nonpayable",
-		"type": "function"
-	},
-	{
-		"inputs": [],
-		"name": "withdrawAll",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"name": "createPetition",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "petitionId",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "payable",
 		"type": "function"
 	},
 	{
@@ -551,7 +468,7 @@ export const PETITION_ABI = [
 						"type": "uint256"
 					},
 					{
-						"internalType": "enum OnChainPetitionTest.Status",
+						"internalType": "enum BasePetition.Status",
 						"name": "status",
 						"type": "uint8"
 					},
@@ -559,9 +476,14 @@ export const PETITION_ABI = [
 						"internalType": "uint256",
 						"name": "createdAt",
 						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "isHidden",
+						"type": "bool"
 					}
 				],
-				"internalType": "struct OnChainPetitionTest.Petition[]",
+				"internalType": "struct BasePetition.Petition[]",
 				"name": "",
 				"type": "tuple[]"
 			}
@@ -622,7 +544,7 @@ export const PETITION_ABI = [
 						"type": "uint256"
 					},
 					{
-						"internalType": "enum OnChainPetitionTest.Status",
+						"internalType": "enum BasePetition.Status",
 						"name": "status",
 						"type": "uint8"
 					},
@@ -630,9 +552,14 @@ export const PETITION_ABI = [
 						"internalType": "uint256",
 						"name": "createdAt",
 						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "isHidden",
+						"type": "bool"
 					}
 				],
-				"internalType": "struct OnChainPetitionTest.Petition",
+				"internalType": "struct BasePetition.Petition",
 				"name": "",
 				"type": "tuple"
 			}
@@ -717,7 +644,7 @@ export const PETITION_ABI = [
 						"type": "uint256"
 					},
 					{
-						"internalType": "enum OnChainPetitionTest.Status",
+						"internalType": "enum BasePetition.Status",
 						"name": "status",
 						"type": "uint8"
 					},
@@ -725,9 +652,14 @@ export const PETITION_ABI = [
 						"internalType": "uint256",
 						"name": "createdAt",
 						"type": "uint256"
+					},
+					{
+						"internalType": "bool",
+						"name": "isHidden",
+						"type": "bool"
 					}
 				],
-				"internalType": "struct OnChainPetitionTest.Petition[]",
+				"internalType": "struct BasePetition.Petition[]",
 				"name": "",
 				"type": "tuple[]"
 			}
@@ -946,7 +878,7 @@ export const PETITION_ABI = [
 				"type": "uint256"
 			},
 			{
-				"internalType": "enum OnChainPetitionTest.Status",
+				"internalType": "enum BasePetition.Status",
 				"name": "status",
 				"type": "uint8"
 			},
@@ -954,9 +886,58 @@ export const PETITION_ABI = [
 				"internalType": "uint256",
 				"name": "createdAt",
 				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isHidden",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "tokenAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "recoverERC20",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_fee",
+				"type": "uint256"
+			}
+		],
+		"name": "setCreationFee",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_petitionId",
+				"type": "uint256"
+			}
+		],
+		"name": "signPetition",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	},
 	{
@@ -981,6 +962,62 @@ export const PETITION_ABI = [
 			}
 		],
 		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_petitionId",
+				"type": "uint256"
+			}
+		],
+		"name": "togglePetitionVisibility",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_petitionId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_targetGoal",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_deadline",
+				"type": "uint256"
+			}
+		],
+		"name": "updatePetition",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "withdrawAll",
+		"outputs": [],
+		"stateMutability": "nonpayable",
 		"type": "function"
 	}
 ] as const;
