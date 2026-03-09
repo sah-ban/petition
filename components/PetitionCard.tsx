@@ -13,6 +13,7 @@ interface Petition {
   signatureCount: bigint;
   status: number;
   createdAt: bigint;
+  isHidden: boolean;
 }
 
 export default function PetitionCard({ petition }: { petition: Petition }) {

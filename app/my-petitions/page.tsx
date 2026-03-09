@@ -28,6 +28,7 @@ interface Petition {
   signatureCount: bigint;
   status: number;
   createdAt: bigint;
+  isHidden: boolean;
 }
 
 function EditModal({
