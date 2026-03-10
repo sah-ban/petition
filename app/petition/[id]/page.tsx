@@ -217,7 +217,7 @@ export default function PetitionDetailPage({
   const handleShareFarcaster = async () => {
     try {
       if (typeof window !== "undefined") {
-        const shareText = `${p.title}\n\nSign this petition on BasePetition 👇`;
+        const shareText = `${p.title}\n\nSign this petition on @basepetition 👇`;
         const isMiniApp = await sdk.isInMiniApp();
 
         if (isMiniApp) {
