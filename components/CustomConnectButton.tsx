@@ -12,6 +12,7 @@ export function CustomConnectButton() {
   const { disconnect } = useDisconnect();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const hasAttemptedAutoConnect = useRef(false);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -30,6 +31,22 @@ export function CustomConnectButton() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (
+      !isConnected &&
+      !hasAttemptedAutoConnect.current &&
+      connectors.length > 0
+    ) {
+      const farcasterConnector = connectors.find(
+        (c) => c.name.toLowerCase() === "farcaster" || c.id === "farcaster",
+      );
+      if (farcasterConnector) {
+        hasAttemptedAutoConnect.current = true;
+        connect({ connector: farcasterConnector });
+      }
+    }
+  }, [connectors, isConnected, connect]);
 
   if (isConnected) {
     if (chainId !== base.id) {
