@@ -22,7 +22,7 @@ const frame = {
       name: "BasePetition",
       url: appUrl,
       splashImageUrl: `${appUrl}/splash.png`,
-      splashBackgroundColor: "#f8fafc",
+      splashBackgroundColor: "#030B15",
     },
   },
 };

@@ -46,7 +46,7 @@ export async function generateMetadata({
           name: "BasePetition",
           url: petitionUrl,
           splashImageUrl: `${appUrl}/splash.png`,
-          splashBackgroundColor: "#f8fafc",
+          splashBackgroundColor: "#030B15",
         },
       },
     };
@@ -75,7 +75,7 @@ export async function generateMetadata({
         name: "BasePetition",
         url: petitionUrl,
         splashImageUrl: `${appUrl}/splash.png`,
-        splashBackgroundColor: "#f8fafc",
+        splashBackgroundColor: "#030B15",
       },
     },
   };
