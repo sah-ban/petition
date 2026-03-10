@@ -37,6 +37,7 @@ export const metadata: Metadata = {
     "Create, sign, and track petitions on the blockchain. Transparent, immutable, and decentralized.",
   other: {
     "fc:frame": JSON.stringify(frame),
+    "base:app_id": "69b05684f9731a9f8a820aaa",
   },
 };
 
