@@ -6,15 +6,17 @@ import { use } from "react";
 import {
   useReadContract,
   useAccount,
-  useWriteContract,
+  useSendTransaction,
   useWaitForTransactionReceipt,
   useEnsName,
 } from "wagmi";
+import { encodeFunctionData } from "viem";
 import {
   PETITION_ABI,
   PETITION_CONTRACT_ADDRESS,
   BASE_CHAIN_ID,
 } from "@/lib/contract";
+import { withAttribution } from "@/lib/attribution";
 import Link from "next/link";
 import { CustomConnectButton } from "@/components/CustomConnectButton";
 import sdk from "@farcaster/miniapp-sdk";
@@ -74,7 +76,7 @@ export default function PetitionDetailPage({
     chainId: BASE_CHAIN_ID,
   });
 
-  const { writeContract, data: txHash, isPending, error } = useWriteContract();
+  const { sendTransaction, data: txHash, isPending, error } = useSendTransaction();
 
   const { data: ensName } = useEnsName({
     address: petition
@@ -95,11 +97,15 @@ export default function PetitionDetailPage({
   }, [isSuccess, refetchPetition, refetchSigners]);
 
   const handleSign = () => {
-    writeContract({
-      address: PETITION_CONTRACT_ADDRESS,
-      abi: PETITION_ABI,
-      functionName: "signPetition",
-      args: [petitionId],
+    sendTransaction({
+      to: PETITION_CONTRACT_ADDRESS,
+      data: withAttribution(
+        encodeFunctionData({
+          abi: PETITION_ABI,
+          functionName: "signPetition",
+          args: [petitionId],
+        })
+      ),
       chainId: BASE_CHAIN_ID,
     });
   };
@@ -390,11 +396,15 @@ export default function PetitionDetailPage({
                     `Are you sure you want to ${p.isHidden ? "UNHIDE" : "HIDE"} this petition?`,
                   )
                 ) {
-                  writeContract({
-                    address: PETITION_CONTRACT_ADDRESS,
-                    abi: PETITION_ABI,
-                    functionName: "togglePetitionVisibility",
-                    args: [petitionId],
+                  sendTransaction({
+                    to: PETITION_CONTRACT_ADDRESS,
+                    data: withAttribution(
+                      encodeFunctionData({
+                        abi: PETITION_ABI,
+                        functionName: "togglePetitionVisibility",
+                        args: [petitionId],
+                      })
+                    ),
                     chainId: BASE_CHAIN_ID,
                   });
                 }

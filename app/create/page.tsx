@@ -4,16 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   useAccount,
-  useWriteContract,
+  useSendTransaction,
   useWaitForTransactionReceipt,
   useReadContract,
 } from "wagmi";
-import { formatEther, parseEventLogs } from "viem";
+import { formatEther, parseEventLogs, encodeFunctionData } from "viem";
 import {
   PETITION_ABI,
   PETITION_CONTRACT_ADDRESS,
   BASE_CHAIN_ID,
 } from "@/lib/contract";
+import { withAttribution } from "@/lib/attribution";
 import { CustomConnectButton } from "@/components/CustomConnectButton";
 
 export default function CreatePetitionPage() {
@@ -39,7 +40,7 @@ export default function CreatePetitionPage() {
   const [warning, setWarning] = useState<string | null>(null);
   const [createdId, setCreatedId] = useState<string | null>(null);
 
-  const { writeContract, data: txHash, isPending, error } = useWriteContract();
+  const { sendTransaction, data: txHash, isPending, error } = useSendTransaction();
   const {
     data: receipt,
     isLoading: isConfirming,
@@ -130,17 +131,21 @@ export default function CreatePetitionPage() {
       ? BigInt(Math.floor(new Date(deadline).getTime() / 1000))
       : 0n;
 
-    writeContract({
-      address: PETITION_CONTRACT_ADDRESS,
-      abi: PETITION_ABI,
-      functionName: "createPetition",
-      args: [
-        title.trim(),
-        description.trim(),
-        imageUrl.trim(),
-        BigInt(targetGoal || "0"),
-        deadlineTimestamp,
-      ],
+    sendTransaction({
+      to: PETITION_CONTRACT_ADDRESS,
+      data: withAttribution(
+        encodeFunctionData({
+          abi: PETITION_ABI,
+          functionName: "createPetition",
+          args: [
+            title.trim(),
+            description.trim(),
+            imageUrl.trim(),
+            BigInt(targetGoal || "0"),
+            deadlineTimestamp,
+          ],
+        })
+      ),
       ...(creationFee && (creationFee as bigint) > 0n
         ? { value: creationFee as bigint }
         : {}),

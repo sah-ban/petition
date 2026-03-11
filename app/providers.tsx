@@ -9,11 +9,16 @@ import {
   createConfig,
 } from "wagmi";
 import { base, mainnet } from "wagmi/chains";
+import { Attribution } from "ox/erc8021";
 import { type ReactNode, useState, useEffect } from "react";
 import { injected } from "wagmi/connectors";
 import sdk from "@farcaster/miniapp-sdk";
 
-const config = createConfig({
+export const DATA_SUFFIX = Attribution.toDataSuffix({
+  codes: ["bc_wtwbih1a"],
+});
+
+export const config = createConfig({
   chains: [base, mainnet],
   connectors: [injected()],
   transports: {
@@ -24,6 +29,7 @@ const config = createConfig({
   storage: createStorage({
     storage: cookieStorage,
   }),
+  dataSuffix: DATA_SUFFIX,
 });
 
 export function Providers({ children }: { children: ReactNode }) {

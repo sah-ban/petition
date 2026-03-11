@@ -5,14 +5,16 @@ import { createPortal } from "react-dom";
 import {
   useAccount,
   useReadContract,
-  useWriteContract,
+  useSendTransaction,
   useWaitForTransactionReceipt,
 } from "wagmi";
+import { encodeFunctionData } from "viem";
 import {
   PETITION_ABI,
   PETITION_CONTRACT_ADDRESS,
   BASE_CHAIN_ID,
 } from "@/lib/contract";
+import { withAttribution } from "@/lib/attribution";
 import Link from "next/link";
 import AdminPanel from "@/components/AdminPanel";
 import { CustomConnectButton } from "@/components/CustomConnectButton";
@@ -47,7 +49,7 @@ function EditModal({
       : "",
   );
 
-  const { writeContract, data: txHash, isPending, error } = useWriteContract();
+  const { sendTransaction, data: txHash, isPending, error } = useSendTransaction();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
   });
@@ -59,11 +61,15 @@ function EditModal({
       ? BigInt(Math.floor(new Date(deadline).getTime() / 1000))
       : 0n;
 
-    writeContract({
-      address: PETITION_CONTRACT_ADDRESS,
-      abi: PETITION_ABI,
-      functionName: "updatePetition",
-      args: [petition.id, BigInt(targetGoal || "0"), deadlineTimestamp],
+    sendTransaction({
+      to: PETITION_CONTRACT_ADDRESS,
+      data: withAttribution(
+        encodeFunctionData({
+          abi: PETITION_ABI,
+          functionName: "updatePetition",
+          args: [petition.id, BigInt(targetGoal || "0"), deadlineTimestamp],
+        })
+      ),
       chainId: BASE_CHAIN_ID,
     });
   };
@@ -244,7 +250,7 @@ function EditModal({
 }
 
 function CloseButton({ petitionId }: { petitionId: bigint }) {
-  const { writeContract, data: txHash, isPending } = useWriteContract();
+  const { sendTransaction, data: txHash, isPending } = useSendTransaction();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash: txHash,
   });
@@ -267,11 +273,15 @@ function CloseButton({ petitionId }: { petitionId: bigint }) {
             "Are you sure you want to close this petition? This cannot be undone.",
           )
         ) {
-          writeContract({
-            address: PETITION_CONTRACT_ADDRESS,
-            abi: PETITION_ABI,
-            functionName: "closePetition",
-            args: [petitionId],
+          sendTransaction({
+            to: PETITION_CONTRACT_ADDRESS,
+            data: withAttribution(
+              encodeFunctionData({
+                abi: PETITION_ABI,
+                functionName: "closePetition",
+                args: [petitionId],
+              })
+            ),
             chainId: BASE_CHAIN_ID,
           });
         }

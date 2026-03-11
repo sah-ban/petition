@@ -4,7 +4,7 @@ import { useState } from "react";
 import {
   useAccount,
   useReadContract,
-  useWriteContract,
+  useSendTransaction,
   useWaitForTransactionReceipt,
   useBalance,
 } from "wagmi";
@@ -13,7 +13,8 @@ import {
   PETITION_CONTRACT_ADDRESS,
   BASE_CHAIN_ID,
 } from "@/lib/contract";
-import { parseEther, parseUnits, formatEther } from "viem";
+import { withAttribution } from "@/lib/attribution";
+import { encodeFunctionData, parseEther, parseUnits, formatEther } from "viem";
 
 export default function AdminPanel() {
   const { address, isConnected } = useAccount();
@@ -43,11 +44,11 @@ export default function AdminPanel() {
   });
 
   const {
-    writeContract: updateFee,
+    sendTransaction: updateFee,
     data: updateFeeTxHash,
     isPending: isUpdatingFee,
     error: updateFeeError,
-  } = useWriteContract();
+  } = useSendTransaction();
 
   const { isLoading: isConfirmingFee, isSuccess: isFeeSuccess } =
     useWaitForTransactionReceipt({
@@ -55,11 +56,11 @@ export default function AdminPanel() {
     });
 
   const {
-    writeContract: withdrawAll,
+    sendTransaction: withdrawAll,
     data: withdrawTxHash,
     isPending: isWithdrawing,
     error: withdrawError,
-  } = useWriteContract();
+  } = useSendTransaction();
 
   const { isLoading: isConfirmingWithdraw, isSuccess: isWithdrawSuccess } =
     useWaitForTransactionReceipt({
@@ -67,11 +68,11 @@ export default function AdminPanel() {
     });
 
   const {
-    writeContract: transferOwnership,
+    sendTransaction: transferOwnership,
     data: transferTxHash,
     isPending: isTransferring,
     error: transferError,
-  } = useWriteContract();
+  } = useSendTransaction();
 
   const { isLoading: isConfirmingTransfer, isSuccess: isTransferSuccess } =
     useWaitForTransactionReceipt({
@@ -79,11 +80,11 @@ export default function AdminPanel() {
     });
 
   const {
-    writeContract: recoverToken,
+    sendTransaction: recoverToken,
     data: recoverTxHash,
     isPending: isRecovering,
     error: recoverError,
-  } = useWriteContract();
+  } = useSendTransaction();
 
   const { isLoading: isConfirmingRecovery, isSuccess: isRecoverySuccess } =
     useWaitForTransactionReceipt({
@@ -102,10 +103,14 @@ export default function AdminPanel() {
     try {
       const feeInWei = parseEther(newFee);
       updateFee({
-        address: PETITION_CONTRACT_ADDRESS,
-        abi: PETITION_ABI,
-        functionName: "setCreationFee",
-        args: [feeInWei],
+        to: PETITION_CONTRACT_ADDRESS,
+        data: withAttribution(
+          encodeFunctionData({
+            abi: PETITION_ABI,
+            functionName: "setCreationFee",
+            args: [feeInWei],
+          })
+        ),
         chainId: BASE_CHAIN_ID,
       });
     } catch (err) {
@@ -115,9 +120,13 @@ export default function AdminPanel() {
 
   const handleWithdraw = () => {
     withdrawAll({
-      address: PETITION_CONTRACT_ADDRESS,
-      abi: PETITION_ABI,
-      functionName: "withdrawAll",
+      to: PETITION_CONTRACT_ADDRESS,
+      data: withAttribution(
+        encodeFunctionData({
+          abi: PETITION_ABI,
+          functionName: "withdrawAll",
+        })
+      ),
       chainId: BASE_CHAIN_ID,
     });
   };
@@ -126,10 +135,14 @@ export default function AdminPanel() {
     e.preventDefault();
     if (!newOwnerAddress) return;
     transferOwnership({
-      address: PETITION_CONTRACT_ADDRESS,
-      abi: PETITION_ABI,
-      functionName: "transferOwnership",
-      args: [newOwnerAddress as `0x${string}`],
+      to: PETITION_CONTRACT_ADDRESS,
+      data: withAttribution(
+        encodeFunctionData({
+          abi: PETITION_ABI,
+          functionName: "transferOwnership",
+          args: [newOwnerAddress as `0x${string}`],
+        })
+      ),
       chainId: BASE_CHAIN_ID,
     });
   };
@@ -141,10 +154,14 @@ export default function AdminPanel() {
       const decimals = parseInt(tokenDecimals, 10);
       const amountInUnits = parseUnits(tokenAmount, decimals);
       recoverToken({
-        address: PETITION_CONTRACT_ADDRESS,
-        abi: PETITION_ABI,
-        functionName: "recoverERC20",
-        args: [tokenAddress as `0x${string}`, amountInUnits],
+        to: PETITION_CONTRACT_ADDRESS,
+        data: withAttribution(
+          encodeFunctionData({
+            abi: PETITION_ABI,
+            functionName: "recoverERC20",
+            args: [tokenAddress as `0x${string}`, amountInUnits],
+          })
+        ),
         chainId: BASE_CHAIN_ID,
       });
     } catch (err) {
