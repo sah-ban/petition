@@ -8,7 +8,7 @@ import {
   useWaitForTransactionReceipt,
   useReadContract,
 } from "wagmi";
-import { formatEther, parseEventLogs, encodeFunctionData } from "viem";
+import { parseEventLogs, encodeFunctionData } from "viem";
 import {
   PETITION_ABI,
   PETITION_CONTRACT_ADDRESS,
@@ -27,9 +27,6 @@ export default function CreatePetitionPage() {
     functionName: "getCreationFee",
     chainId: BASE_CHAIN_ID,
   });
-
-  const feeInEth = creationFee ? formatEther(creationFee as bigint) : "0";
-  const isFree = !creationFee || (creationFee as bigint) === 0n;
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -464,26 +461,6 @@ export default function CreatePetitionPage() {
                   "Transaction failed"}
               </div>
             )}
-
-            {!isFree && (
-              <div
-                style={{
-                  padding: "12px 16px",
-                  borderRadius: "var(--radius-md)",
-                  background: "rgba(var(--primary-rgb, 99, 102, 241), 0.1)",
-                  border:
-                    "1px solid rgba(var(--primary-rgb, 99, 102, 241), 0.2)",
-                  marginBottom: "16px",
-                  fontSize: "0.9rem",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                }}
-              >
-                Creation fee: <strong>{feeInEth} ETH</strong>
-              </div>
-            )}
-
             <button
               type="submit"
               className="btn btn-primary btn-lg"
