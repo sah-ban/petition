@@ -30,7 +30,7 @@ const faqs = [
       },
       {
         q: "How much does it cost to create a petition?",
-        a: "Creating a petition is currently free, but the administrator may charge a small network creation fee in the future. Note that standard blockchain gas fees will still apply for submitting the transaction on the Base network.",
+        a: "There is a small creation fee to prevent spam and maintain the platform. Standard blockchain gas fees on Base also apply.",
       },
       {
         q: "Is there a character limit for petitions?",
