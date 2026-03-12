@@ -14,7 +14,7 @@ export async function generateMetadata({
   try {
     const client = createPublicClient({
       chain: base,
-      transport: http("https://mainnet.base.org"),
+      transport: http(process.env.BASE_RPC_URL),
     });
 
     const petition = (await client.readContract({

@@ -26,7 +26,7 @@ export default async function OGImage({
   try {
     const client = createPublicClient({
       chain: base,
-      transport: http(),
+      transport: http(process.env.BASE_RPC_URL),
     });
 
     const petition = await client.readContract({
