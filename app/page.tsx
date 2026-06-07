@@ -86,18 +86,18 @@ export default function HomePage() {
         .reverse()
     : [];
 
-  const { data: pinnedPetitionData, isLoading: isPinnedLoading } =
-    useReadContract({
-      address: PETITION_CONTRACT_ADDRESS,
-      abi: PETITION_ABI,
-      functionName: "getPetition",
-      args: [0n],
-      chainId: BASE_CHAIN_ID,
-    });
+  // const { data: pinnedPetitionData, isLoading: isPinnedLoading } =
+  //   useReadContract({
+  //     address: PETITION_CONTRACT_ADDRESS,
+  //     abi: PETITION_ABI,
+  //     functionName: "getPetition",
+  //     args: [0n],
+  //     chainId: BASE_CHAIN_ID,
+  //   });
 
-  const pinnedPetition = pinnedPetitionData as Petition | undefined;
+  // const pinnedPetition = pinnedPetitionData as Petition | undefined;
 
-  const isLoading = isTotalLoading || isPetitionsLoading || isPinnedLoading;
+  const isLoading = isTotalLoading || isPetitionsLoading // || isPinnedLoading;
 
   return (
     <>
@@ -131,7 +131,7 @@ export default function HomePage() {
       </section>
 
       {/* Pinned Petition */}
-      {pinnedPetition && !pinnedPetition.isHidden && pinnedPetition.title && (
+      {/* {pinnedPetition && !pinnedPetition.isHidden && pinnedPetition.title && (
         <section className="container" style={{ paddingTop: "24px", paddingBottom: "24px" }}>
           <div
             style={{
@@ -147,7 +147,7 @@ export default function HomePage() {
             <PetitionCard petition={pinnedPetition} />
           </div>
         </section>
-      )}
+      )} */}
 
       {/* Petitions Grid */}
       <section className="container">
